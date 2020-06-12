@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.email.category.mapper.CdsEmailCategoryMapper">
+    
+	<sql id="cdsEmailCategoryColumns">
+		a.id AS "id",
+		a.owner_id AS "owner.id",
+		a.category_name AS "categoryName",
+		a.server AS "server",
+		a.host AS "host",
+		a.port AS "port",
+		a.is_enable AS "isEnable",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		owner.name AS "owner.name"
+	</sql>
+	
+	<sql id="cdsEmailCategoryJoins">
+		
+		LEFT JOIN sys_user owner ON owner.id = a.owner_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsEmailCategory" >
+		SELECT 
+			<include refid="cdsEmailCategoryColumns"/>
+		FROM cds_email_category a
+		<include refid="cdsEmailCategoryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsEmailCategory" >
+		SELECT 
+			<include refid="cdsEmailCategoryColumns"/>
+		FROM cds_email_category a
+		<include refid="cdsEmailCategoryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="owner != null and owner.id != null and owner.id != ''">
+				AND a.owner_id = #{owner.id}
+			</if>
+			<if test="categoryName != null and categoryName != ''">
+				AND a.category_name = #{categoryName}
+			</if>
+			<if test="server != null and server != ''">
+				AND a.server LIKE 
+					<if test="dbName == 'oracle'">'%'||#{server}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{server}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{server},'%')</if>
+			</if>
+			<if test="host != null and host != ''">
+				AND a.host LIKE 
+					<if test="dbName == 'oracle'">'%'||#{host}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{host}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{host},'%')</if>
+			</if>
+			<if test="port != null and port != ''">
+				AND a.port LIKE 
+					<if test="dbName == 'oracle'">'%'||#{port}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{port}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{port},'%')</if>
+			</if>
+			<if test="isEnable != null and isEnable != ''">
+				AND a.is_enable = #{isEnable}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsEmailCategory" >
+		SELECT 
+			<include refid="cdsEmailCategoryColumns"/>
+		FROM cds_email_category a
+		<include refid="cdsEmailCategoryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_email_category(
+			id,
+			owner_id,
+			category_name,
+			server,
+			host,
+			port,
+			is_enable,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{owner.id},
+			#{categoryName},
+			#{server},
+			#{host},
+			#{port},
+			#{isEnable},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_email_category SET 	
+			owner_id = #{owner.id},
+			category_name = #{categoryName},
+			server = #{server},
+			host = #{host},
+			port = #{port},
+			is_enable = #{isEnable},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_email_category
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_email_category SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsEmailCategory" statementType="STATEMENT">
+		select * FROM cds_email_category  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

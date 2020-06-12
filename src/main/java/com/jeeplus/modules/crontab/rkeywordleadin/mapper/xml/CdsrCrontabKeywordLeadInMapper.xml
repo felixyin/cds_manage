@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.crontab.rkeywordleadin.mapper.CdsrCrontabKeywordLeadInMapper">
+    
+	<sql id="cdsrCrontabKeywordLeadInColumns">
+		a.id AS "id",
+		a.crontab_setting_id AS "crontabSetting.id",
+		a.keyword_seeker_id AS "keywordSeeker.id",
+		a.lead_category AS "leadIn.category",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		crontabSetting.name AS "crontabSetting.name"
+	</sql>
+	
+	<sql id="cdsrCrontabKeywordLeadInJoins">
+		
+		LEFT JOIN cds_crontab_setting crontabSetting ON crontabSetting.id = a.crontab_setting_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsrCrontabKeywordLeadIn" >
+		SELECT 
+			<include refid="cdsrCrontabKeywordLeadInColumns"/>
+		FROM cdsr_crontab_keyword_leadin a
+		<include refid="cdsrCrontabKeywordLeadInJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsrCrontabKeywordLeadIn" >
+		SELECT 
+			<include refid="cdsrCrontabKeywordLeadInColumns"/>
+		FROM cdsr_crontab_keyword_leadin a
+		<include refid="cdsrCrontabKeywordLeadInJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="crontabSetting != null and crontabSetting.id != null and crontabSetting.id != ''">
+				AND a.crontab_setting_id = #{crontabSetting.id}
+			</if>
+			<if test="keywordSeeker != null and keywordSeeker.id != null and keywordSeeker.id != ''">
+				AND a.keyword_seeker_id = #{keywordSeeker.id}
+			</if>
+			<if test="leadIn != null and leadIn.category != null and leadIn.category != ''">
+				AND a.lead_category = #{leadIn.category}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsrCrontabKeywordLeadIn" >
+		SELECT 
+			<include refid="cdsrCrontabKeywordLeadInColumns"/>
+		FROM cdsr_crontab_keyword_leadin a
+		<include refid="cdsrCrontabKeywordLeadInJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cdsr_crontab_keyword_leadin(
+			id,
+			crontab_setting_id,
+			keyword_seeker_id,
+			lead_category,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{crontabSetting.id},
+			#{keywordSeeker.id},
+			#{leadIn.category},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cdsr_crontab_keyword_leadin SET 	
+			crontab_setting_id = #{crontabSetting.id},
+			keyword_seeker_id = #{keywordSeeker.id},
+			lead_category = #{leadIn.category},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cdsr_crontab_keyword_leadin
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cdsr_crontab_keyword_leadin SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsrCrontabKeywordLeadIn" statementType="STATEMENT">
+		select * FROM cdsr_crontab_keyword_leadin  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.email.template.mapper.CdsEmailTemplateMapper">
+    
+	<sql id="cdsEmailTemplateColumns">
+		a.id AS "id",
+		a.owner_id AS "owner.id",
+		a.subject AS "subject",
+		a.main_body AS "mainBody",
+		a.is_enable AS "isEnable",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		owner.name AS "owner.name"
+	</sql>
+	
+	<sql id="cdsEmailTemplateJoins">
+		
+		LEFT JOIN sys_user owner ON owner.id = a.owner_id
+	</sql>
+	
+    <resultMap type="CdsEmailTemplate" id="CdsEmailTemplateResult" autoMapping="true">
+    	<result column="main_body" property="mainBody"   typeHandler="com.jeeplus.core.mapper.ConvertBlobTypeHandler"/>
+    </resultMap>
+    
+	<select id="get" resultMap="CdsEmailTemplateResult" >
+		SELECT 
+			<include refid="cdsEmailTemplateColumns"/>
+		FROM cds_email_template a
+		<include refid="cdsEmailTemplateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultMap="CdsEmailTemplateResult" >
+		SELECT 
+			<include refid="cdsEmailTemplateColumns"/>
+		FROM cds_email_template a
+		<include refid="cdsEmailTemplateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="owner != null and owner.id != null and owner.id != ''">
+				AND a.owner_id = #{owner.id}
+			</if>
+			<if test="subject != null and subject != ''">
+				AND a.subject LIKE 
+					<if test="dbName == 'oracle'">'%'||#{subject}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{subject}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{subject},'%')</if>
+			</if>
+			<if test="mainBody != null and mainBody != ''">
+				AND a.main_body LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mainBody}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mainBody}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mainBody},'%')</if>
+			</if>
+			<if test="isEnable != null and isEnable != ''">
+				AND a.is_enable = #{isEnable}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultMap="CdsEmailTemplateResult" >
+		SELECT 
+			<include refid="cdsEmailTemplateColumns"/>
+		FROM cds_email_template a
+		<include refid="cdsEmailTemplateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_email_template(
+			id,
+			owner_id,
+			subject,
+			main_body,
+			is_enable,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{owner.id},
+			#{subject},
+			#{mainBody},
+			#{isEnable},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_email_template SET 	
+			owner_id = #{owner.id},
+			subject = #{subject},
+			main_body = #{mainBody},
+			is_enable = #{isEnable},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_email_template
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_email_template SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsEmailTemplate" statementType="STATEMENT">
+		select * FROM cds_email_template  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

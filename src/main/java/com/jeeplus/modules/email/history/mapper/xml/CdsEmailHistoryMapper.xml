@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.email.history.mapper.CdsEmailHistoryMapper">
+    
+	<sql id="cdsEmailHistoryColumns">
+		a.id AS "id",
+		a.send_by AS "sendBy.id",
+		a.send_date AS "sendDate",
+		a.send_email_id AS "sendEmail",
+		a.inbox_email_id AS "inboxEmail",
+		a.email_send_status AS "emailSendStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flags AS "delFlag",
+				
+		sendBy.name AS "sendBy.name"
+	</sql>
+	
+	<sql id="cdsEmailHistoryJoins">
+		
+		LEFT JOIN sys_user sendBy ON sendBy.id = a.send_by
+	</sql>
+	
+    
+	<select id="get" resultType="CdsEmailHistory" >
+		SELECT 
+			<include refid="cdsEmailHistoryColumns"/>
+		FROM cds_email_history a
+		<include refid="cdsEmailHistoryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsEmailHistory" >
+		SELECT 
+			<include refid="cdsEmailHistoryColumns"/>
+		FROM cds_email_history a
+		<include refid="cdsEmailHistoryJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="sendBy != null and sendBy.id != null and sendBy.id != ''">
+				AND a.send_by = #{sendBy.id}
+			</if>
+			<if test="beginSendDate != null and endSendDate != null ">
+				AND a.send_date BETWEEN #{beginSendDate} AND #{endSendDate}
+			</if>
+			<if test="sendEmail != null and sendEmail != ''">
+				AND a.send_email_id = #{sendEmail}
+			</if>
+			<if test="inboxEmail != null and inboxEmail != ''">
+				AND a.inbox_email_id = #{inboxEmail}
+			</if>
+			<if test="emailSendStatus != null and emailSendStatus != ''">
+				AND a.email_send_status = #{emailSendStatus}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flags = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsEmailHistory" >
+		SELECT 
+			<include refid="cdsEmailHistoryColumns"/>
+		FROM cds_email_history a
+		<include refid="cdsEmailHistoryJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_email_history(
+			id,
+			send_by,
+			send_date,
+			send_email_id,
+			inbox_email_id,
+			email_send_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flags
+		) VALUES (
+			#{id},
+			#{sendBy.id},
+			#{sendDate},
+			#{sendEmail},
+			#{inboxEmail},
+			#{emailSendStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_email_history SET 	
+			send_email_id = #{sendEmail},
+			inbox_email_id = #{inboxEmail},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			del_flags = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_email_history
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_email_history SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsEmailHistory" statementType="STATEMENT">
+		select * FROM cds_email_history  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

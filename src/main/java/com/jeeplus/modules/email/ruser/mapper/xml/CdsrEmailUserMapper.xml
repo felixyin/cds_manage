@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.email.ruser.mapper.CdsrEmailUserMapper">
+    
+	<sql id="cdsrEmailUserColumns">
+		a.id AS "id",
+		a.send_email AS "sendEmail",
+		a.password AS "password",
+		a.email_category_id AS "emailCategory.id",
+		a.send_times AS "sendTimes",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+				
+				
+		emailCategory.category_name AS "emailCategory.categoryName"
+	</sql>
+	
+	<sql id="cdsrEmailUserJoins">
+		
+		LEFT JOIN cds_email_category emailCategory ON emailCategory.id = a.email_category_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsrEmailUser" >
+		SELECT 
+			<include refid="cdsrEmailUserColumns"/>
+		FROM cdsr_email_user a
+		<include refid="cdsrEmailUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsrEmailUser" >
+		SELECT 
+			<include refid="cdsrEmailUserColumns"/>
+		FROM cdsr_email_user a
+		<include refid="cdsrEmailUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="sendEmail != null and sendEmail != ''">
+				AND a.send_email LIKE 
+					<if test="dbName == 'oracle'">'%'||#{sendEmail}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{sendEmail}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{sendEmail},'%')</if>
+			</if>
+			<if test="password != null and password != ''">
+				AND a.password LIKE 
+					<if test="dbName == 'oracle'">'%'||#{password}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{password}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{password},'%')</if>
+			</if>
+			<if test="emailCategory != null and emailCategory.id != null and emailCategory.id != ''">
+				AND a.email_category_id = #{emailCategory.id}
+			</if>
+			<if test="beginSendTimes != null and endSendTimes != null ">
+				AND a.send_times BETWEEN #{beginSendTimes} AND #{endSendTimes}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.remarks ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsrEmailUser" >
+		SELECT 
+			<include refid="cdsrEmailUserColumns"/>
+		FROM cdsr_email_user a
+		<include refid="cdsrEmailUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cdsr_email_user(
+			id,
+			send_email,
+			password,
+			email_category_id,
+			send_times,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{sendEmail},
+			#{password},
+			#{emailCategory.id},
+			#{sendTimes},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cdsr_email_user SET 	
+			send_email = #{sendEmail},
+			password = #{password},
+			email_category_id = #{emailCategory.id},
+			send_times = #{sendTimes},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cdsr_email_user
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cdsr_email_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsrEmailUser" statementType="STATEMENT">
+		select * FROM cdsr_email_user  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

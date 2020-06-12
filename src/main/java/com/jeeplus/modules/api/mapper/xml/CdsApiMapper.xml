@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.api.mapper.CdsApiMapper">
+
+    <select id="findKeywordByUser" resultType="com.jeeplus.modules.keyword.entity.CdsKeyword">
+		SELECT a.*,rks.id as keywordSeekerId
+		FROM cds_keyword a RIGHT JOIN cdsr_keyword_seeker rks
+		ON a.id = rks.keyword_id
+		WHERE rks.owner_id = #{user.id} AND a.keyword != ''
+	</select>
+    <select id="findHostAndUrl" resultType="com.jeeplus.modules.api.entity.CdsCrawlHostAndEmail">
+		SELECT ch.`host`,ch.crawl_times,ch.is_find_email,cu.url,cu.title
+		FROM cds_crawl_url cu
+		LEFT JOIN cds_crawl_host ch ON cu.crawl_host_id = ch.id
+		WHERE ch.host = #{host}
+	</select>
+    <select id="findHostAndUrlEmail" resultType="com.jeeplus.modules.api.entity.CdsCrawlHostAndEmail">
+		SELECT cu.id, ch.`host`,ch.crawl_times,ch.is_find_email,cu.url,cu.title
+		FROM cds_crawl_url cu
+		LEFT JOIN cdsr_crawl_keyword ck ON ck.crawl_url_id = cu.id
+		LEFT JOIN cds_crawl_host ch ON cu.crawl_host_id = ch.id
+		WHERE ck.keyword_id = #{keywordId}
+	</select>
+    <select id="findKeywordAndSelectedByUser" resultType="com.jeeplus.modules.keyword.entity.CdsKeyword">
+		SELECT a.*,rks.is AS keywordSeekerId
+		FROM cds_keyword a RIGHT join cdsr_keyword_seeker rks
+		ON a.id = rks.keyword_id
+		WHERE rks.owner_id = #{user.id}
+	</select>
+    <select id="findUserLeadInCategories" resultType="java.lang.String">
+		SELECT li.category FROM cds_lead_in li INNER JOIN cdsr_crontab_keyword_leadin ckl ON ckl.lead_category = li.category
+		INNER JOIN cds_crontab_setting cs ON cs.id = ckl.crontab_setting_id
+		WHERE cs.owner_id = #{user.id}
+		GROUP BY category
+	</select>
+    <select id="findAllLeadInCategories" resultType="java.lang.String">
+		SELECT li.category FROM cds_lead_in li GROUP BY category
+	</select>
+
+</mapper>

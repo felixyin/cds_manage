@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.crawl.url.mapper.CdsCrawlUrlMapper">
+    
+	<sql id="cdsCrawlUrlColumns">
+		a.id AS "id",
+		a.crawl_host_id AS "crawlHost.id",
+		a.url AS "url",
+		a.title AS "title",
+		a.description AS "description",
+		a.crawl_times AS "crawlTimes",
+		a.elapsed_time AS "elapsedTime",
+		a.site_lastdate AS "siteLastDate",
+		a.is_find_email AS "isFindEmail",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		crawlHost.host AS "crawlHost.host"
+	</sql>
+	
+	<sql id="cdsCrawlUrlJoins">
+		
+		LEFT JOIN cds_crawl_host crawlHost ON crawlHost.id = a.crawl_host_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsCrawlUrl" >
+		SELECT 
+			<include refid="cdsCrawlUrlColumns"/>
+		FROM cds_crawl_url a
+		<include refid="cdsCrawlUrlJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsCrawlUrl" >
+		SELECT 
+			<include refid="cdsCrawlUrlColumns"/>
+		FROM cds_crawl_url a
+		<include refid="cdsCrawlUrlJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="crawlHost != null and crawlHost.id != null and crawlHost.id != ''">
+				AND a.crawl_host_id = #{crawlHost.id}
+			</if>
+			<if test="url != null and url != ''">
+				AND a.url LIKE 
+					<if test="dbName == 'oracle'">'%'||#{url}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{url}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{url},'%')</if>
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description LIKE 
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{description},'%')</if>
+			</if>
+			<if test="beginCrawlTimes != null and endCrawlTimes != null ">
+				AND a.crawl_times BETWEEN #{beginCrawlTimes} AND #{endCrawlTimes}
+			</if>
+			<if test="beginElapsedTime != null and endElapsedTime != null ">
+				AND a.elapsed_time BETWEEN #{beginElapsedTime} AND #{endElapsedTime}
+			</if>
+			<if test="beginSiteLastDate != null and endSiteLastDate != null ">
+				AND a.site_lastdate BETWEEN #{beginSiteLastDate} AND #{endSiteLastDate}
+			</if>
+			<if test="isFindEmail != null and isFindEmail != ''">
+				AND a.is_find_email = #{isFindEmail}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsCrawlUrl" >
+		SELECT 
+			<include refid="cdsCrawlUrlColumns"/>
+		FROM cds_crawl_url a
+		<include refid="cdsCrawlUrlJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_crawl_url(
+			id,
+			crawl_host_id,
+			url,
+			title,
+			description,
+			crawl_times,
+			elapsed_time,
+			site_lastdate,
+			is_find_email,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{crawlHost.id},
+			#{url},
+			#{title},
+			#{description},
+			#{crawlTimes},
+			#{elapsedTime},
+			#{siteLastDate},
+			#{isFindEmail},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_crawl_url SET 	
+			crawl_host_id = #{crawlHost.id},
+			url = #{url},
+			title = #{title},
+			description = #{description},
+			crawl_times = #{crawlTimes},
+			elapsed_time = #{elapsedTime},
+			site_lastdate = #{siteLastDate},
+			is_find_email = #{isFindEmail},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_crawl_url
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_crawl_url SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsCrawlUrl" statementType="STATEMENT">
+		select * FROM cds_crawl_url  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

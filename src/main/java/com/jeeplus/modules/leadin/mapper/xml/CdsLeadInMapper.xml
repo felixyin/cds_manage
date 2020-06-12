@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.leadin.mapper.CdsLeadInMapper">
+    
+	<sql id="cdsLeadInColumns">
+		a.id AS "id",
+		a.category AS "category",
+		a.company AS "company",
+		a.area AS "area",
+		a.website AS "website",
+		a.email AS "email",
+		a.is_valid_email AS "isValidEmail",
+		a.contacts AS "contacts",
+		a.phone AS "phone",
+		a.fax AS "fax",
+		a.address AS "address",
+		a.msn AS "msn",
+		a.skype AS "skype",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="cdsLeadInJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="CdsLeadIn" >
+		SELECT 
+			<include refid="cdsLeadInColumns"/>
+		FROM cds_lead_in a
+		<include refid="cdsLeadInJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsLeadIn" >
+		SELECT 
+			<include refid="cdsLeadInColumns"/>
+		FROM cds_lead_in a
+		<include refid="cdsLeadInJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="category != null and category != ''">
+				AND a.category LIKE 
+					<if test="dbName == 'oracle'">'%'||#{category}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{category}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{category},'%')</if>
+			</if>
+			<if test="company != null and company != ''">
+				AND a.company LIKE 
+					<if test="dbName == 'oracle'">'%'||#{company}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{company}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{company},'%')</if>
+			</if>
+			<if test="area != null and area != ''">
+				AND a.area LIKE 
+					<if test="dbName == 'oracle'">'%'||#{area}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{area}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{area},'%')</if>
+			</if>
+			<if test="website != null and website != ''">
+				AND a.website LIKE 
+					<if test="dbName == 'oracle'">'%'||#{website}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{website}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{website},'%')</if>
+			</if>
+			<if test="email != null and email != ''">
+				AND a.email LIKE 
+					<if test="dbName == 'oracle'">'%'||#{email}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{email}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{email},'%')</if>
+			</if>
+			<if test="isValidEmail != null and isValidEmail != ''">
+				AND a.is_valid_email LIKE 
+					<if test="dbName == 'oracle'">'%'||#{isValidEmail}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{isValidEmail}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{isValidEmail},'%')</if>
+			</if>
+			<if test="contacts != null and contacts != ''">
+				AND a.contacts LIKE 
+					<if test="dbName == 'oracle'">'%'||#{contacts}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{contacts}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{contacts},'%')</if>
+			</if>
+			<if test="phone != null and phone != ''">
+				AND a.phone LIKE 
+					<if test="dbName == 'oracle'">'%'||#{phone}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{phone}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{phone},'%')</if>
+			</if>
+			<if test="fax != null and fax != ''">
+				AND a.fax LIKE 
+					<if test="dbName == 'oracle'">'%'||#{fax}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{fax}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{fax},'%')</if>
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address LIKE 
+					<if test="dbName == 'oracle'">'%'||#{address}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{address}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{address},'%')</if>
+			</if>
+			<if test="msn != null and msn != ''">
+				AND a.msn LIKE 
+					<if test="dbName == 'oracle'">'%'||#{msn}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{msn}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{msn},'%')</if>
+			</if>
+			<if test="skype != null and skype != ''">
+				AND a.skype LIKE 
+					<if test="dbName == 'oracle'">'%'||#{skype}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{skype}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{skype},'%')</if>
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsLeadIn" >
+		SELECT 
+			<include refid="cdsLeadInColumns"/>
+		FROM cds_lead_in a
+		<include refid="cdsLeadInJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_lead_in(
+			id,
+			category,
+			company,
+			area,
+			website,
+			email,
+			is_valid_email,
+			contacts,
+			phone,
+			fax,
+			address,
+			msn,
+			skype,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{category},
+			#{company},
+			#{area},
+			#{website},
+			#{email},
+			#{isValidEmail},
+			#{contacts},
+			#{phone},
+			#{fax},
+			#{address},
+			#{msn},
+			#{skype},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_lead_in SET 	
+			category = #{category},
+			company = #{company},
+			area = #{area},
+			website = #{website},
+			email = #{email},
+			is_valid_email = #{isValidEmail},
+			contacts = #{contacts},
+			phone = #{phone},
+			fax = #{fax},
+			address = #{address},
+			msn = #{msn},
+			skype = #{skype},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_lead_in
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_lead_in SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsLeadIn" statementType="STATEMENT">
+		select * FROM cds_lead_in  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

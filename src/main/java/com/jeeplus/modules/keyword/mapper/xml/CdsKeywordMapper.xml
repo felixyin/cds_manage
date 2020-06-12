@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.keyword.mapper.CdsKeywordMapper">
+    
+	<sql id="cdsKeywordColumns">
+		a.id AS "id",
+		a.keyword AS "keyword",
+		a.times AS "times",
+		a.host_count AS "hostCount",
+		a.email_count AS "emailCount",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="cdsKeywordJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="CdsKeyword" >
+		SELECT 
+			<include refid="cdsKeywordColumns"/>
+		FROM cds_keyword a
+		<include refid="cdsKeywordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsKeyword" >
+		SELECT 
+			<include refid="cdsKeywordColumns"/>
+		FROM cds_keyword a
+		<include refid="cdsKeywordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="keyword != null and keyword != ''">
+				AND a.keyword LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keyword}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keyword}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keyword},'%')</if>
+			</if>
+			<if test="beginTimes != null and endTimes != null ">
+				AND a.times BETWEEN #{beginTimes} AND #{endTimes}
+			</if>
+			<if test="beginHostCount != null and endHostCount != null ">
+				AND a.host_count BETWEEN #{beginHostCount} AND #{endHostCount}
+			</if>
+			<if test="beginEmailCount != null and endEmailCount != null ">
+				AND a.email_count BETWEEN #{beginEmailCount} AND #{endEmailCount}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsKeyword" >
+		SELECT 
+			<include refid="cdsKeywordColumns"/>
+		FROM cds_keyword a
+		<include refid="cdsKeywordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_keyword(
+			id,
+			keyword,
+			times,
+			host_count,
+			email_count,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{keyword},
+			#{times},
+			#{hostCount},
+			#{emailCount},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_keyword SET 	
+			keyword = #{keyword},
+			times = #{times},
+			host_count = #{hostCount},
+			email_count = #{emailCount},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_keyword
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_keyword SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsKeyword" statementType="STATEMENT">
+		select * FROM cds_keyword  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

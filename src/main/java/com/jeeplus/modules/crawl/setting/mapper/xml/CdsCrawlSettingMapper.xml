@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.crawl.setting.mapper.CdsCrawlSettingMapper">
+    
+	<sql id="cdsCrawlSettingColumns">
+		a.id AS "id",
+		a.owner_id AS "owner.id",
+		a.site_queue AS "siteQueue",
+		a.site_sleep AS "siteSleep",
+		a.digging_depth AS "diggingDepth",
+		a.thread_count AS "threadCount",
+		a.thread_sleep AS "threadSleep",
+		a.fetch_timeout AS "fetchTimeout",
+		a.is_need_distinct AS "isNeedDistinct",
+		a.is_verify_email AS "isVerifyEmail",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		owner.name AS "owner.name"
+	</sql>
+	
+	<sql id="cdsCrawlSettingJoins">
+		
+		LEFT JOIN sys_user owner ON owner.id = a.owner_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsCrawlSetting" >
+		SELECT 
+			<include refid="cdsCrawlSettingColumns"/>
+		FROM cds_crawl_setting a
+		<include refid="cdsCrawlSettingJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsCrawlSetting" >
+		SELECT 
+			<include refid="cdsCrawlSettingColumns"/>
+		FROM cds_crawl_setting a
+		<include refid="cdsCrawlSettingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="owner != null and owner.id != null and owner.id != ''">
+				AND a.owner_id = #{owner.id}
+			</if>
+			<if test="beginSiteQueue != null and endSiteQueue != null ">
+				AND a.site_queue BETWEEN #{beginSiteQueue} AND #{endSiteQueue}
+			</if>
+			<if test="beginSiteSleep != null and endSiteSleep != null ">
+				AND a.site_sleep BETWEEN #{beginSiteSleep} AND #{endSiteSleep}
+			</if>
+			<if test="beginDiggingDepth != null and endDiggingDepth != null ">
+				AND a.digging_depth BETWEEN #{beginDiggingDepth} AND #{endDiggingDepth}
+			</if>
+			<if test="beginThreadCount != null and endThreadCount != null ">
+				AND a.thread_count BETWEEN #{beginThreadCount} AND #{endThreadCount}
+			</if>
+			<if test="beginThreadSleep != null and endThreadSleep != null ">
+				AND a.thread_sleep BETWEEN #{beginThreadSleep} AND #{endThreadSleep}
+			</if>
+			<if test="beginFetchTimeout != null and endFetchTimeout != null ">
+				AND a.fetch_timeout BETWEEN #{beginFetchTimeout} AND #{endFetchTimeout}
+			</if>
+			<if test="isNeedDistinct != null and isNeedDistinct != ''">
+				AND a.is_need_distinct = #{isNeedDistinct}
+			</if>
+			<if test="isVerifyEmail != null and isVerifyEmail != ''">
+				AND a.is_verify_email = #{isVerifyEmail}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsCrawlSetting" >
+		SELECT 
+			<include refid="cdsCrawlSettingColumns"/>
+		FROM cds_crawl_setting a
+		<include refid="cdsCrawlSettingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_crawl_setting(
+			id,
+			owner_id,
+			site_queue,
+			site_sleep,
+			digging_depth,
+			thread_count,
+			thread_sleep,
+			fetch_timeout,
+			is_need_distinct,
+			is_verify_email,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{owner.id},
+			#{siteQueue},
+			#{siteSleep},
+			#{diggingDepth},
+			#{threadCount},
+			#{threadSleep},
+			#{fetchTimeout},
+			#{isNeedDistinct},
+			#{isVerifyEmail},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_crawl_setting SET 	
+			owner_id = #{owner.id},
+			site_queue = #{siteQueue},
+			site_sleep = #{siteSleep},
+			digging_depth = #{diggingDepth},
+			thread_count = #{threadCount},
+			thread_sleep = #{threadSleep},
+			fetch_timeout = #{fetchTimeout},
+			is_need_distinct = #{isNeedDistinct},
+			is_verify_email = #{isVerifyEmail},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_crawl_setting
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_crawl_setting SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsCrawlSetting" statementType="STATEMENT">
+		select * FROM cds_crawl_setting  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

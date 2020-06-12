@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.crontab.setting.mapper.CdsCrontabSettingMapper">
+    
+	<sql id="cdsCrontabSettingColumns">
+		a.id AS "id",
+		a.owner_id AS "owner.id",
+		a.name AS "name",
+		a.exe_time AS "exeTime",
+		a.minute AS "minute",
+		a.hour AS "hour",
+		a.dayofweek AS "dayOfWeek",
+		a.date AS "date",
+		a.month AS "month",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		owner.name AS "owner.name"
+	</sql>
+	
+	<sql id="cdsCrontabSettingJoins">
+		
+		LEFT JOIN sys_user owner ON owner.id = a.owner_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsCrontabSetting" >
+		SELECT 
+			<include refid="cdsCrontabSettingColumns"/>
+		FROM cds_crontab_setting a
+		<include refid="cdsCrontabSettingJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsCrontabSetting" >
+		SELECT 
+			<include refid="cdsCrontabSettingColumns"/>
+		FROM cds_crontab_setting a
+		<include refid="cdsCrontabSettingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="owner != null and owner.id != null and owner.id != ''">
+				AND a.owner_id = #{owner.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="beginExeTime != null and endExeTime != null ">
+				AND a.exe_time BETWEEN #{beginExeTime} AND #{endExeTime}
+			</if>
+			<if test="minute != null and minute != ''">
+				AND a.minute LIKE 
+					<if test="dbName == 'oracle'">'%'||#{minute}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{minute}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{minute},'%')</if>
+			</if>
+			<if test="hour != null and hour != ''">
+				AND a.hour LIKE 
+					<if test="dbName == 'oracle'">'%'||#{hour}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{hour}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{hour},'%')</if>
+			</if>
+			<if test="dayOfWeek != null and dayOfWeek != ''">
+				AND a.dayofweek LIKE 
+					<if test="dbName == 'oracle'">'%'||#{dayOfWeek}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{dayOfWeek}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{dayOfWeek},'%')</if>
+			</if>
+			<if test="date != null and date != ''">
+				AND a.date LIKE 
+					<if test="dbName == 'oracle'">'%'||#{date}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{date}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{date},'%')</if>
+			</if>
+			<if test="month != null and month != ''">
+				AND a.month LIKE 
+					<if test="dbName == 'oracle'">'%'||#{month}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{month}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{month},'%')</if>
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsCrontabSetting" >
+		SELECT 
+			<include refid="cdsCrontabSettingColumns"/>
+		FROM cds_crontab_setting a
+		<include refid="cdsCrontabSettingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_crontab_setting(
+			id,
+			owner_id,
+			name,
+			exe_time,
+			minute,
+			hour,
+			dayofweek,
+			date,
+			month,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{owner.id},
+			#{name},
+			#{exeTime},
+			#{minute},
+			#{hour},
+			#{dayOfWeek},
+			#{date},
+			#{month},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_crontab_setting SET 	
+			owner_id = #{owner.id},
+			name = #{name},
+			exe_time = #{exeTime},
+			minute = #{minute},
+			hour = #{hour},
+			dayofweek = #{dayOfWeek},
+			date = #{date},
+			month = #{month},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_crontab_setting
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_crontab_setting SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsCrontabSetting" statementType="STATEMENT">
+		select * FROM cds_crontab_setting  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.crawl.email.mapper.CdsCrawlEmailMapper">
+    
+	<sql id="cdsCrawlEmailColumns">
+		a.id AS "id",
+		a.inbox_email AS "email",
+		a.crawl_host_id AS "crawlHost.id",
+		a.send_times AS "sendTimes",
+		a.is_valid_email AS "isValidEmail",
+		a.send_status AS "sendStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+				
+		crawlHost.host AS "crawlHost.host"
+	</sql>
+	
+	<sql id="cdsCrawlEmailJoins">
+		
+		LEFT JOIN cds_crawl_host crawlHost ON crawlHost.id = a.crawl_host_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsCrawlEmail" >
+		SELECT 
+			<include refid="cdsCrawlEmailColumns"/>
+		FROM cds_crawl_email a
+		<include refid="cdsCrawlEmailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsCrawlEmail" >
+		SELECT 
+			<include refid="cdsCrawlEmailColumns"/>
+		FROM cds_crawl_email a
+		<include refid="cdsCrawlEmailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="email != null and email != ''">
+				AND a.inbox_email LIKE 
+					<if test="dbName == 'oracle'">'%'||#{email}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{email}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{email},'%')</if>
+			</if>
+			<if test="crawlHost != null and crawlHost.id != null and crawlHost.id != ''">
+				AND a.crawl_host_id = #{crawlHost.id}
+			</if>
+			<if test="beginSendTimes != null and endSendTimes != null ">
+				AND a.send_times BETWEEN #{beginSendTimes} AND #{endSendTimes}
+			</if>
+			<if test="isValidEmail != null and isValidEmail != ''">
+				AND a.is_valid_email = #{isValidEmail}
+			</if>
+			<if test="sendStatus != null and sendStatus != ''">
+				AND a.send_status = #{sendStatus}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsCrawlEmail" >
+		SELECT 
+			<include refid="cdsCrawlEmailColumns"/>
+		FROM cds_crawl_email a
+		<include refid="cdsCrawlEmailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cds_crawl_email(
+			id,
+			inbox_email,
+			crawl_host_id,
+			send_times,
+			is_valid_email,
+			send_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{email},
+			#{crawlHost.id},
+			#{sendTimes},
+			#{isValidEmail},
+			#{sendStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cds_crawl_email SET 	
+			inbox_email = #{email},
+			crawl_host_id = #{crawlHost.id},
+			send_times = #{sendTimes},
+			is_valid_email = #{isValidEmail},
+			send_status = #{sendStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cds_crawl_email
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cds_crawl_email SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsCrawlEmail" statementType="STATEMENT">
+		select * FROM cds_crawl_email  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

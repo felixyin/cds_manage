@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.keyword_seeker.mapper.CdsrKeywordSeekerMapper">
+    
+	<sql id="cdsrKeywordSeekerColumns">
+		a.id AS "id",
+		a.owner_id AS "owner.id",
+		a.keyword_id AS "keyword.id",
+		a.search_time AS "searchTime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+				
+		owner.name AS "owner.name"
+	</sql>
+	
+	<sql id="cdsrKeywordSeekerJoins">
+		
+		LEFT JOIN sys_user owner ON owner.id = a.owner_id
+	</sql>
+	
+    
+	<select id="get" resultType="CdsrKeywordSeeker" >
+		SELECT 
+			<include refid="cdsrKeywordSeekerColumns"/>
+		FROM cdsr_keyword_seeker a
+		<include refid="cdsrKeywordSeekerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CdsrKeywordSeeker" >
+		SELECT 
+			<include refid="cdsrKeywordSeekerColumns"/>
+		FROM cdsr_keyword_seeker a
+		<include refid="cdsrKeywordSeekerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="owner != null and owner.id != null and owner.id != ''">
+				AND a.owner_id = #{owner.id}
+			</if>
+			<if test="keyword != null and keyword.id != null and keyword.id != ''">
+				AND a.keyword_id = #{keyword.id}
+			</if>
+			<if test="beginSearchTime != null and endSearchTime != null ">
+				AND a.search_time BETWEEN #{beginSearchTime} AND #{endSearchTime}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CdsrKeywordSeeker" >
+		SELECT 
+			<include refid="cdsrKeywordSeekerColumns"/>
+		FROM cdsr_keyword_seeker a
+		<include refid="cdsrKeywordSeekerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cdsr_keyword_seeker(
+			id,
+			owner_id,
+			keyword_id,
+			search_time,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{owner.id},
+			#{keyword.id},
+			#{searchTime},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cdsr_keyword_seeker SET 	
+			owner_id = #{owner.id},
+			keyword_id = #{keyword.id},
+			search_time = #{searchTime},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cdsr_keyword_seeker
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cdsr_keyword_seeker SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CdsrKeywordSeeker" statementType="STATEMENT">
+		select * FROM cdsr_keyword_seeker  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
